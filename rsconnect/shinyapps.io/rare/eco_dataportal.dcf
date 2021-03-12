@@ -5,9 +5,9 @@ account: rare
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1472066
-bundleId: 4332006
+bundleId: 4335635
 url: https://rare.shinyapps.io/eco_dataportal/
-when: 1615484420.36476
+when: 1615555168.36817
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: Dashboard_extra_code.R|Dashboard_extra_code2.R|Eco_Dashboard.R|Eco_MainPanel.png|IDN_fish_ab.csv|join_fish_surveys_fishbase_updated.csv|mar_data_091218.csv|SES_Biophysical Map_v3.png|species_lw_final.csv|adm
+ignoredFiles: Dashboard_extra_code.R|Dashboard_extra_code2.R|Eco_Dashboard.R|Eco_MainPanel.png|IDN_fish_ab.csv|join_fish_surveys_fishbase_updated.csv|mar_data_091218.csv|SES_Biophysical Map_v3.png|species_lw_final.csv

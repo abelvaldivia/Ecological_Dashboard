@@ -105,16 +105,8 @@ source("R/utils.R")
                                    location_name + location_status  + transectno,
                                  data = subset(benthic.surveys, percentage >0), FUN = count_unique, na.action = na.omit)
 
-##### VIEW MAP ##### 
-  portal_map <- aggregate(cbind(lat,lon) ~ 
-                            country + 
-                            level1_name + 
-                            level2_name +  
-                            ma_name + 
-                            location_name,
-                            data = fish.surveys, 
-                          FUN = mean, na.rm = TRUE)
-    
+
+ 
   
 
   

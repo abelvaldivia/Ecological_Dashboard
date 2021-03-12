@@ -36,7 +36,7 @@
   ## Municipality/Subdistrict
   output$Managed_Access <- renderUI({
     selectInput(inputId = 'Managed_Access', 
-                label = strong("Managed Access"), 
+                label = strong("Managed Access Area"), 
                 choices = as.vector(sort(unique(droplevels(subset(fish.surveys, 
                               country %in% input$Country & 
                                  level1_name %in% input$Subnational_Government &
@@ -191,6 +191,15 @@
    
    #Selected Data for map Cover data
    selectedData_map <- reactive ({ 
+      portal_map <- aggregate(cbind(lat,lon) ~ 
+                                 country + 
+                                 level1_name + 
+                                 level2_name +  
+                                 ma_name + 
+                                 location_name,
+                              data = fish.surveys, 
+                              FUN = mean, na.rm = TRUE)
+      
      droplevels(subset(portal_map,
                        country %in% input$Country & 
                          level1_name %in% input$Subnational_Government & 
@@ -225,7 +234,7 @@
       ggtitle("\nTOTAL FISH BIOMASS")+
       scale_colour_manual (values = c("#F58233", "#00AFD8"))+
             #input$y_log + #scale_x_log10()
-            xlab ("") + ylab ("Fish biomass (kg/ha)") #+ coord_flip(clip="on")
+            xlab ("") + ylab ("Fish biomass (kg / ha)") #+ coord_flip(clip="on")
       plot_fish.biomass.mci
        }
       
@@ -241,7 +250,7 @@
       ggtitle(paste("\nFAMILY",toupper(c(input$fish_family))))+
       scale_colour_manual (values = c("#F58233", "#00AFD8"))+
        #input$y_log + #scale_x_log10()
-      xlab ("") + ylab ("Fish biomass (kg/ha)") #+ coord_flip(clip="on")
+      xlab ("") + ylab ("Fish biomass (kg / ha)") #+ coord_flip(clip="on")
     plot_fish.biomass.mci
       }
     }
@@ -266,7 +275,7 @@
              ggtitle("\nTOTAL FISH BIOMASS")+
              #scale_y_continuous(expand = c(0,0))+#, limits = c(0, max(summary_data$biomass_kg_ha)))+
              #scale_y_log10()+
-             xlab ("") + ylab ("Fish biomass (kg/ha)") #+ coord_flip(clip="on")
+             xlab ("") + ylab ("Fish biomass (kg / ha)") #+ coord_flip(clip="on")
           
           plot_fish.biomass.bar
           
@@ -275,22 +284,37 @@
        
       else if (input$fish_family != "All fish families") {
        
-      summary_data <- summarySE(data = subset(selectedData_fish.biomass.family(), family == input$fish_family), 
+      summary_data <- summarySE(data = subset(selectedData_fish.biomass.family(), 
+                                              family == input$fish_family), 
                                 measurevar = "biomass_kg_ha",
-                                groupvars = c("country", input$grouping_level, "location_status"))
-                                  
-      plot_fish.biomass.bar <- ggplot(summary_data, aes(location_status, biomass_kg_ha), na.rm=TRUE) +
+                                groupvars = c("country", 
+                                              input$grouping_level, 
+                                              "location_status"))
+      plot_fish.biomass.bar <- 
+         ggplot(summary_data,
+                aes(location_status, 
+                    biomass_kg_ha), 
+                na.rm=TRUE) +
         theme_rare + 
-        facet_wrap(c(input$grouping_level), ncol=4, scale = input$y_axis)+
-         geom_bar(aes(fill = location_status), position=position_dodge(), stat = "identity",
-                   width = .5, colour="black", size=.3)+
-          geom_errorbar(aes(ymin=biomass_kg_ha - SE, ymax = biomass_kg_ha + SE),
-              size = .5, position=position_dodge(width=.2), na.rm=TRUE, width=.2) +
+        facet_wrap(c(input$grouping_level), 
+                   ncol=4, 
+                   scale = input$y_axis)+
+         geom_bar(aes(fill = location_status), 
+                  position=position_dodge(), 
+                  stat = "identity",
+                  width = .5, 
+                  colour="black", 
+                  size=.3)+
+          geom_errorbar(aes(ymin=biomass_kg_ha - SE, 
+                            ymax = biomass_kg_ha + SE),
+              size = .5, 
+              position=position_dodge(width=.2), 
+              na.rm=TRUE, width=.2) +
           scale_fill_manual (values = c("#F58233", "#00AFD8"))+
-        ggtitle(paste("\nFAMILY", toupper(input$fish_family)))+
-        #scale_y_continuous(expand = c(0,0))+#, limits = c(0, max(summary_data$biomass_kg_ha)))+
-        #scale_y_log10()+
-        xlab ("") + ylab ("Fish biomass (kg/ha)") #+ coord_flip(clip="on")
+        ggtitle(paste("\nFAMILY", 
+                      toupper(input$fish_family)))+
+         xlab ("") + 
+         ylab ("Fish biomass (kg / ha)")
       
       plot_fish.biomass.bar
       
@@ -812,331 +836,6 @@
    )
    
    
-  ## Sites trends ####
-   ## Fish biomass
-   ### Create a boxplot  ####
-   output$plot1 <- renderPlot({
-     
-     par(mfrow = c(2,3), mar=c(3,2,2,1), oma=c(1,2,1,1), cex=1)
-     
-     # IF BOXPLOT IS  CHOSEN ###
-     if (input$Analysis == "Site trends") {
-       
-       if (input$plot_type == "Bar plots") {
-         
-         par(mfrow = c(2,5), mar=c(3,2,2,1), oma=c(1,2,1,1), cex=1)
-         
-         boxplot(TF/10~Year, selectedData(), main = "TOTAL FISH", ylab=NULL, outline=T, lty=1,
-                 col=c("lightblue"), las=1)
-         points(factor(selectedData()$Year), (selectedData()$TF/10), col = "darkgrey")
-         mtext("biomass (kg/ha)", side = 2, line = 3, cex= 1.2)
-         
-         boxplot(HHRI/10~Year, selectedData(), main = "HERBIVOROUS", ylab=NULL, outline=T,
-                 lty=1, col=c("lightblue"), las=1) 
-         points(factor(selectedData()$Year), jitter(selectedData()$HHRI/10), col = "darkgrey")
-         
-         boxplot(I/10~Year, selectedData(), main = "INVERTIVOROUS", ylab=NULL, outline=T,
-                 lty=1, col=c("lightblue"), las=1) 
-         points(factor(selectedData()$Year), jitter(selectedData()$I/10), col = "darkgrey")
-         
-         boxplot(P/10~Year, selectedData(), main = "PISCIVOROUS", ylab=NULL, outline=T,
-                 lty=1, col=c("lightblue"), las=1) #, names = c("current", "predicted"))
-         points(factor(selectedData()$Year), jitter(selectedData()$P/10), col = "darkgrey")
-         
-         boxplot(CSHRI/10~Year, selectedData(), main = "COMMERCIAL", ylab=NULL, outline=T,
-                 lty=1, col=c("lightblue"), las=1) #, names = c("current", "predicted"))
-         points(factor(selectedData()$Year), jitter(selectedData()$CSHRI/10), col = "darkgrey")
-         
-         boxplot(PARR/10~Year, selectedData(), main = "PARROTFISH", ylab="biomass (kg/ha)", outline=F,
-                 lty=1, col=c("lightblue"), las=1) #, names = c("current", "predicted"))
-         points(factor(selectedData()$Year), jitter(selectedData()$PARR/10), col = "darkgrey")
-         
-         mtext("biomass (kg/ha)", side = 2, line = 3, cex= 1.2)
-         boxplot(SEAB/10~Year, selectedData(), main = "GROUPERS", ylab=NULL, outline=T,
-                 lty=1, col=c("lightblue"), las=1) #, names = c("current", "predicted"))
-         points(factor(selectedData()$Year), jitter(selectedData()$SEAB/10), col = "darkgrey")
-         
-         boxplot(SNAP/10~Year, selectedData(), main = "SNAPPERS", ylab=NULL, outline=T,
-                 lty=1, col=c("lightblue"), las=1) # names = c("current", "predicted"))
-         points(factor(selectedData()$Year), jitter(selectedData()$SNAP/10), col = "darkgrey")
-         
-         boxplot(JACK/10~Year, selectedData(), main = "JACKS", ylab=NULL, outline=T,
-                 lty=1, col=c("lightblue"), las=1) #, names = c("current", "predicted"))
-         points(factor(selectedData()$Year), jitter(selectedData()$JACK/10), col = "darkgrey")
-         
-         boxplot(GRUN/10~Year, selectedData(), main = "GRUNTS", ylab=NULL, outline=T, 
-                 lty=1, col=c("lightblue"), las=1) #names = c("current", "predicted"))
-         points(factor(selectedData()$Year), jitter(selectedData()$GRUN/10), col = "darkgrey")
-         
-       } 
-       
-       
-       ## IF MEAN and SE is selected ##
-       else if (input$plot_type == "Mean ± 95% CI") {
-         
-         par(mfrow = c(2,5), mar=c(3,2,2,1), oma=c(1,2,1,1), cex=1)
-         
-         p1 <- ggplot(selectedData(), aes(factor(Year), selectedData()$TF/10) ) + theme_bw()+
-           #geom_jitter(shape=1, width = .1, alpha=.2) +
-           stat_summary(fun.data = "mean_se", geom = "pointrange", 
-                        size = .5, position=position_dodge(width=.5)) +
-           theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-                 plot.title = element_text(hjust=0.5, face = 'bold', size = 14),
-                 axis.title.y = element_text(size=12),
-                 axis.text  = element_text(size=12))+
-           ggtitle("TOTAL FISH") + xlab("") + ylab("biomass (kg/ha)")
-         
-         p1a <- ggplot(selectedData_IDN(), aes(factor(Year), log(selectedData_IDN()$biomass_kg_ha+1))) + 
-           #facet_wrap(~inside_or_outside_NTZ)+
-           ggtitle("TOTAL FISH") + xlab("") + ylab("biomass (kg/ha)")
-         geom_boxplot()+ theme_bw() +
-           theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-                 plot.title = element_text(hjust=0.5, face = 'bold', size = 14),
-                 axis.title.y = element_text(size=12),
-                 axis.text  = element_text(size=12))+
-           geom_jitter(width=0.05,height=0.05, alpha = 0.5)
-         
-         p2 <- ggplot(selectedData(), aes(factor(Year), selectedData()$HHRI/10) ) + theme_bw()+
-           #geom_jitter(shape=1, width = .1, alpha=.2) +
-           stat_summary(fun.data = "mean_se", geom = "pointrange", 
-                        size = .5, position=position_dodge(width=.5)) +
-           theme(panel.grid.major = element_blank(),  panel.grid.minor = element_blank(),
-                 plot.title = element_text(hjust=0.5, face = 'bold', size = 14),
-                 axis.text  = element_text(size=12)) +
-           ggtitle("HERBIVOROUS") + xlab("") + ylab(NULL)
-         
-         p3 <- ggplot(selectedData(), aes(factor(Year), selectedData()$I/10) ) + theme_bw()+
-           #geom_jitter(shape=1, width = .1, alpha=.2) +
-           stat_summary(fun.data = "mean_se", geom = "pointrange", 
-                        size = .5, position=position_dodge(width=.5)) +
-           theme(panel.grid.major = element_blank(),  panel.grid.minor = element_blank(),
-                 plot.title = element_text(hjust=0.5, face = 'bold', size = 14),
-                 axis.text  = element_text(size=12)) +
-           ggtitle("INVERTIVOROUS") + xlab("") + ylab(NULL)
-         
-         p4 <- ggplot(selectedData(), aes(factor(Year), selectedData()$P/10) ) + theme_bw()+
-           #geom_jitter(shape=1, width = .1, alpha=.2) +
-           stat_summary(fun.data = "mean_se", geom = "pointrange", 
-                        size = .5, position=position_dodge(width=.5)) +
-           theme(panel.grid.major = element_blank(),  panel.grid.minor = element_blank(),
-                 plot.title = element_text(hjust=0.5, face = 'bold', size = 14),
-                 axis.text  = element_text(size=12)) +
-           ggtitle("PISCIVOROUS") + xlab("") + ylab(NULL)
-         
-         p5 <- ggplot(selectedData(), aes(factor(Year), selectedData()$CSHRI/10) ) + theme_bw()+
-           #geom_jitter(shape=1, width = .1, alpha=.2) +
-           stat_summary(fun.data = "mean_se", geom = "pointrange", 
-                        size = .5, position=position_dodge(width=.5)) +
-           theme(panel.grid.major = element_blank(),  panel.grid.minor = element_blank(),
-                 plot.title = element_text(hjust=0.5, face = 'bold', size = 14),
-                 axis.text  = element_text(size=12)) +
-           ggtitle("COMMERCIAL") + xlab("") + ylab(NULL)
-         
-         p6 <- ggplot(selectedData(), aes(factor(Year), selectedData()$PARR/10) ) + theme_bw()+
-           #geom_jitter(shape=1, width = .1, alpha=.2) +
-           stat_summary(fun.data = "mean_se", geom = "pointrange", 
-                        size = .5, position=position_dodge(width=.5)) +
-           theme(panel.grid.major = element_blank(),  panel.grid.minor = element_blank(),
-                 plot.title = element_text(hjust=0.5, face = 'bold', size = 14),
-                 axis.title.y = element_text(size=12),
-                 axis.text  = element_text(size=12)) +
-           ggtitle("PARROTFISH") + xlab("") + ylab("biomass (kg/ha)")
-         
-         p7 <- ggplot(selectedData(), aes(factor(Year), selectedData()$SEAB/10) ) + theme_bw()+
-           #geom_jitter(shape=1, width = .1, alpha=.2) +
-           stat_summary(fun.data = "mean_se", geom = "pointrange", 
-                        size = .5, position=position_dodge(width=.5)) +
-           theme(panel.grid.major = element_blank(),  panel.grid.minor = element_blank(),
-                 plot.title = element_text(hjust=0.5, face = 'bold', size =14),
-                 axis.text  = element_text(size=12)) +
-           ggtitle("GROUPERS") + xlab("") + ylab(NULL)
-         
-         p8 <- ggplot(selectedData(), aes(factor(Year), selectedData()$SNAP/10) ) + theme_bw()+
-           #geom_jitter(shape=1, width = .1, alpha=.2) +
-           stat_summary(fun.data = "mean_se", geom = "pointrange", 
-                        size = .5, position=position_dodge(width=.5)) +
-           theme(panel.grid.major = element_blank(),  panel.grid.minor = element_blank(),
-                 plot.title = element_text(hjust=0.5, face = 'bold', size = 14),
-                 axis.text  = element_text(size=12)) +
-           ggtitle("SNAPPERS") + xlab("") + ylab(NULL)
-         
-         p9 <- ggplot(selectedData(), aes(factor(Year), selectedData()$JACK/10) ) + theme_bw()+
-           #geom_jitter(shape=1, width = .1, alpha=.2) +
-           stat_summary(fun.data = "mean_se", geom = "pointrange", 
-                        size = .5, position=position_dodge(width=.5)) +
-           theme(panel.grid.major = element_blank(),  panel.grid.minor = element_blank(),
-                 plot.title = element_text(hjust=0.5, face = 'bold', size =14),
-                 axis.text  = element_text(size=12)) +
-           ggtitle("JACKS") + xlab("") + ylab(NULL)
-         
-         p10 <- ggplot(selectedData(), aes(factor(Year), selectedData()$GRU/10) ) + theme_bw()+
-           #geom_jitter(shape=1, width = .1, alpha=.2) +
-           stat_summary(fun.data = "mean_se", geom = "pointrange", 
-                        size = .5, position=position_dodge(width=.5)) +
-           theme(panel.grid.major = element_blank(),  panel.grid.minor = element_blank(),
-                 plot.title = element_text(hjust=0.5, face = 'bold', size =14),
-                 axis.text  = element_text(size=12)) +
-           ggtitle("GRUNTS") + xlab("") + ylab(NULL)
-         
-         grid.arrange(p1, p1a, p3, p4, p5, p6, p7, p8, p9, p10, nrow = 2, ncol=5)
-         
-       }
-       
-       else if (input$plot_type == "Trend lines") {
-         
-         par(mfrow = c(2,5), mar=c(3,2,2,1), oma=c(1,2,1,1), cex=1)
-         
-         p1 <- ggplot(selectedData(), aes((Year), selectedData()$TF/10) ) + theme_bw()+
-           #geom_jitter(shape=1, width = .1, alpha=.2) +
-           geom_smooth()+
-           theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-                 plot.title = element_text(hjust=0.5, face = 'bold', size = 14),
-                 axis.title.y = element_text(size=12),
-                 axis.text  = element_text(size=12))+
-           ggtitle("TOTAL FISH") + xlab("") + ylab("biomass (kg/ha)")
-         
-         p2 <- ggplot(selectedData(), aes((Year), selectedData()$HHRI/10) ) + theme_bw()+
-           #geom_jitter(shape=1, width = .1, alpha=.2) +
-           geom_smooth()+
-           theme(panel.grid.major = element_blank(),  panel.grid.minor = element_blank(),
-                 plot.title = element_text(hjust=0.5, face = 'bold', size = 14),
-                 axis.text  = element_text(size=12)) +
-           ggtitle("HERBIVOROUS") + xlab("") + ylab(NULL)
-         
-         p3 <- ggplot(selectedData(), aes( (Year), selectedData()$I/10) ) + theme_bw()+
-           #geom_jitter(shape=1, width = .1, alpha=.2) +
-           geom_smooth()+
-           theme(panel.grid.major = element_blank(),  panel.grid.minor = element_blank(),
-                 plot.title = element_text(hjust=0.5, face = 'bold', size = 14),
-                 axis.text  = element_text(size=12)) +
-           ggtitle("INVERTIVOROUS") + xlab("") + ylab(NULL)
-         
-         p4 <- ggplot(selectedData(), aes( (Year), selectedData()$P/10) ) + theme_bw()+
-           #geom_jitter(shape=1, width = .1, alpha=.2) +
-           geom_smooth()+
-           theme(panel.grid.major = element_blank(),  panel.grid.minor = element_blank(),
-                 plot.title = element_text(hjust=0.5, face = 'bold', size = 14),
-                 axis.text  = element_text(size=12)) +
-           ggtitle("PISCIVOROUS") + xlab("") + ylab(NULL)
-         
-         p5 <- ggplot(selectedData(), aes( (Year), selectedData()$CSHRI/10) ) + theme_bw()+
-           #geom_jitter(shape=1, width = .1, alpha=.2) +
-           geom_smooth()+
-           theme(panel.grid.major = element_blank(),  panel.grid.minor = element_blank(),
-                 plot.title = element_text(hjust=0.5, face = 'bold', size = 14),
-                 axis.text  = element_text(size=12)) +
-           ggtitle("COMMERCIAL") + xlab("") + ylab(NULL)
-         
-         p6 <- ggplot(selectedData(), aes( (Year), selectedData()$PARR/10) ) + theme_bw()+
-           #geom_jitter(shape=1, width = .1, alpha=.2) +
-           geom_smooth()+
-           theme(panel.grid.major = element_blank(),  panel.grid.minor = element_blank(),
-                 plot.title = element_text(hjust=0.5, face = 'bold', size = 14),
-                 axis.title.y = element_text(size=12),
-                 axis.text  = element_text(size=12)) +
-           ggtitle("PARROTFISH") + xlab("") + ylab("biomass (kg/ha)")
-         
-         p7 <- ggplot(selectedData(), aes( (Year), selectedData()$SEAB/10) ) + theme_bw()+
-           #geom_jitter(shape=1, width = .1, alpha=.2) +
-           geom_smooth()+
-           theme(panel.grid.major = element_blank(),  panel.grid.minor = element_blank(),
-                 plot.title = element_text(hjust=0.5, face = 'bold', size =14),
-                 axis.text  = element_text(size=12)) +
-           ggtitle("GROUPERS") + xlab("") + ylab(NULL)
-         
-         p8 <- ggplot(selectedData(), aes( (Year), selectedData()$SNAP/10) ) + theme_bw()+
-           #geom_jitter(shape=1, width = .1, alpha=.2) +
-           geom_smooth()+
-           theme(panel.grid.major = element_blank(),  panel.grid.minor = element_blank(),
-                 plot.title = element_text(hjust=0.5, face = 'bold', size = 14),
-                 axis.text  = element_text(size=12)) +
-           ggtitle("SNAPPERS") + xlab("") + ylab(NULL)
-         
-         p9 <- ggplot(selectedData(), aes( (Year), selectedData()$JACK/10) ) + theme_bw()+
-           #geom_jitter(shape=1, width = .1, alpha=.2) +
-           geom_smooth()+
-           theme(panel.grid.major = element_blank(),  panel.grid.minor = element_blank(),
-                 plot.title = element_text(hjust=0.5, face = 'bold', size =14),
-                 axis.text  = element_text(size=12)) +
-           ggtitle("JACKS") + xlab("") + ylab(NULL)
-         
-         p10 <- ggplot(selectedData(), aes( (Year), selectedData()$GRU/10) ) + theme_bw()+
-           #geom_jitter(shape=1, width = .1, alpha=.2) +
-           geom_smooth()+
-           theme(panel.grid.major = element_blank(),  panel.grid.minor = element_blank(),
-                 plot.title = element_text(hjust=0.5, face = 'bold', size =14),
-                 axis.text  = element_text(size=12)) +
-           ggtitle("GRUNTS") + xlab("") + ylab(NULL)
-         
-         grid.arrange(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, nrow = 2, ncol=5)
-         
-       }
-       
-     }
-     
-     else if (input$Analysis == "Site Trends") {
-       
-       if (input$plot_type == "Bar plots") {
-         
-         par(mfrow = c(2,5), mar=c(3,2,2,1), oma=c(1,2,1,1), cex=1)
-         
-         boxplot(TF/10~Zone, mar1, main = "TOTAL FISH", ylab=NULL, outline=T, lty=1,
-                 col=c("darkorange","white", "lightblue"), las=1,
-                 names=c("Fished", "GU", "Reserve"))
-         points(factor(selectedData()$Zone), (selectedData()$TF/10), col = "darkgrey")
-         mtext("biomass (kg/ha)", side = 2, line = 3, cex= 1.2)
-         
-         boxplot(HHRI/10~Zone, selectedData(), main = "HERBIVOROUS", ylab=NULL, outline=T,
-                 lty=1, col=c("darkorange","white", "lightblue"), las=1,
-                 names=c("Fished", "General Use", "Reserve"))
-         points(factor(selectedData()$Zone), jitter(selectedData()$HHRI/10), col = "darkgrey")
-         
-         boxplot(I/10~Zone, selectedData(), main = "INVERTIVOROUS", ylab=NULL, outline=T,
-                 lty=1, col=c("darkorange","white", "lightblue"), las=1,
-                 names=c("Fished", "General Use", "Reserve"))
-         points(factor(selectedData()$Zone), jitter(selectedData()$I/10), col = "darkgrey")
-         
-         boxplot(P/10~Zone, selectedData(), main = "PISCIVOROUS", ylab=NULL, outline=T,
-                 lty=1, col=c("darkorange","white", "lightblue"), las=1,
-                 names=c("Fished", "General Use", "Reserve"))
-         points(factor(selectedData()$Zone), jitter(selectedData()$P/10), col = "darkgrey")
-         
-         boxplot(CSHRI/10~Zone, selectedData(), main = "COMMERCIAL", ylab=NULL, outline=T,
-                 lty=1, col=c("darkorange","white", "lightblue"), las=1,
-                 names=c("Fished", "General Use", "Reserve"))
-         points(factor(selectedData()$Zone), jitter(selectedData()$CSHRI/10), col = "darkgrey")
-         
-         boxplot(PARR/10~Zone, selectedData(), main = "PARROTFISH", ylab="biomass (kg/ha)", outline=F,
-                 lty=1, col=c("darkorange","white", "lightblue"), las=1,
-                 names=c("Fished", "General Use", "Reserve"))
-         points(factor(selectedData()$Zone), jitter(selectedData()$PARR/10), col = "darkgrey")
-         
-         mtext("biomass (kg/ha)", side = 2, line = 3, cex= 1.2)
-         boxplot(SEAB/10~Zone, selectedData(), main = "GROUPERS", ylab=NULL, outline=T,
-                 lty=1, col=c("darkorange","white", "lightblue"), 
-                 las=1, names=c("Fished", "General Use", "Reserve"))
-         points(factor(selectedData()$Zone), jitter(selectedData()$SEAB/10), col = "darkgrey")
-         
-         boxplot(SNAP/10~Zone, selectedData(), main = "SNAPPERS", ylab=NULL, outline=T,
-                 lty=1, col=c("darkorange","white", "lightblue"), las=1,
-                 names=c("Fished", "General Use", "Reserve"))
-         points(factor(selectedData()$Zone), jitter(selectedData()$SNAP/10), col = "darkgrey")
-         
-         boxplot(JACK/10~Zone, selectedData(), main = "JACKS", ylab=NULL, outline=T,
-                 lty=1, col=c("darkorange","white", "lightblue"), las=1,
-                 names=c("Fished", "General Use", "Reserve"))
-         points(factor(selectedData()$Zone), jitter(selectedData()$JACK/10), col = "darkgrey")
-         
-         boxplot(GRUN/10~Zone, selectedData(), main = "GRUNTS", ylab=NULL, outline=T, 
-                 lty=1, col=c("darkorange","white", "lightblue"), las=1, 
-                 names=c("Fished", "General Use", "Reserve"))
-         points(factor(selectedData()$Zone), jitter(selectedData()$GRUN/10), col = "darkgrey")
-         
-       }
-     }
-     
-   }) 
-   
   ### OUTPUT Instructions ###
   output$Note <- renderText("PLEASE NOTE:") 
   output$Notetext <- renderText("This app may time-out if left idle too long, which will cause the screen to grey-out. To use the app again, refresh the page")
@@ -1164,13 +863,9 @@
       if(is.null(e)) return(" ")
       paste0(round(e$y, 1), "\n")
     }
-    
-    # xy_mean_str <- function(e) {
-    #  if(is.null(e)) return("")
-    # paste0(round(e$ymin, 1), round(e$ymax, 1))
-    #}
+ 
     paste0("Value: ", xy_str(input$plot_hover))#,
-    #"Biomass Mean:", xy_mean_str(input$plot_hover), "kg/ha")
+   
     
   })
   
