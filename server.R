@@ -3,43 +3,40 @@
   
   shinyServer(function(input, output, session) {
   
-  ### Create nested selection based on inputs
-    
-  #output$Density_plots <- renderUI({
-    
-  #  if (tabPanel == "Fish size structure") {
-  
- #  radioButtons(inputId = "plot_type", strong("Plot type"),
-  #               choices = c("Bar plots", "Density plots"), 
-  #               selected = "Bar plots") 
-  #  }
-  #})
   
   ## Region/Province
   
   output$Subnational_Government <- renderUI({
-    selectInput(inputId = "Subnational_Government", label= strong("Subnational Government"), 
+    selectInput(inputId = "Subnational_Government", 
+                label= strong("Subnational Government"), 
                 choices = as.vector(sort(unique(droplevels(subset(fish.surveys, 
                                        country %in% input$Country))$level1_name))),
-                selected = "South East Sulawesi",
-                multiple = FALSE, selectize = TRUE) #, options = list(`actions-box` = TRUE))
+                selected = as.vector(sort(unique(droplevels(subset(fish.surveys, 
+                                       country %in% input$Country))$level1_name))),
+                multiple = TRUE, 
+                selectize = FALSE,
+                size = 2)
         })
 
   ## District/Administration
   output$Local_Government <- renderUI({
-    selectInput(inputId = 'Local_Government', label= strong("Local Government"), #selected = "No Fishing Zone",
+    selectInput(inputId = 'Local_Government', 
+                label= strong("Local Government"), #selected = "No Fishing Zone",
                 choices = as.vector(sort(unique(droplevels(subset(fish.surveys, 
                                 country %in% input$Country & 
                                    level1_name %in% input$Subnational_Government))$level2_name))),
                 selected = as.vector(sort(unique(droplevels(subset(fish.surveys, 
                                 country %in% input$Country & 
                                    level1_name %in% input$Subnational_Government))$level2_name))),
-                multiple = TRUE, selectize = FALSE, size = 2) #, options = list(`actions-box` = TRUE))
+                multiple = TRUE, 
+                selectize = FALSE, 
+                size = 2) 
          })
   
   ## Municipality/Subdistrict
   output$Managed_Access <- renderUI({
-    selectInput(inputId = 'Managed_Access', label = strong("Managed Access"), #selected = "No Fishing Zone",
+    selectInput(inputId = 'Managed_Access', 
+                label = strong("Managed Access"), 
                 choices = as.vector(sort(unique(droplevels(subset(fish.surveys, 
                               country %in% input$Country & 
                                  level1_name %in% input$Subnational_Government &
@@ -48,7 +45,9 @@
                                 country %in% input$Country & 
                                    level1_name %in% input$Subnational_Government &
                                     level2_name %in% input$Local_Government))$ma_name))),
-                          multiple = TRUE, selectize = FALSE, size =2) #, options = list(`actions-box` = TRUE))
+               multiple = TRUE, 
+               selectize = FALSE, 
+               size =2)
           })
   
   ## Select Fish famlies, families and trophic groups within the selected data
@@ -60,7 +59,8 @@
                                       level2_name %in% input$Local_Government &
                                           ma_name %in% input$Managed_Access))$family)))),
                 selected =  "All fish families",
-                 multiple = FALSE, selectize = TRUE)
+                 multiple = FALSE, 
+                  selectize = TRUE)
    })
   
   # Select fish species within each family
@@ -80,30 +80,24 @@
                                    level2_name %in% input$Local_Government &
                                     ma_name %in% input$Managed_Access &
                                       family %in% input$fish_family))$species)))),
-                     multiple = FALSE, selectize = TRUE)
+                multiple = FALSE, 
+                selectize = TRUE)
   })
   
 
   output$habitat_category <- renderUI({
-     selectInput(inputId = 'habitat_category', label = strong("SELECT A HABITAT CATEGORY"), 
+     selectInput(inputId = 'habitat_category', 
+                 label = strong("SELECT A HABITAT CATEGORY"), 
          choices =  as.vector(sort(unique(droplevels(subset(benthic.surveys, 
                         country %in% input$Country & 
                            level1_name %in% input$Subnational_Government &
                               level2_name %in% input$Local_Government &
                                  ma_name %in% input$Managed_Access))$category))),
                  selected =  "Hard coral",
-                 multiple = FALSE, selectize = TRUE)
+                 multiple = FALSE, 
+                 selectize = TRUE)
   })
   
-  #Select Year range to be plotted with sliders
-   #output$Year <- renderUI({
-    # sliderInput(inputId = "Year", strong("Year:"), round = T, step=1,
-     #         min = 2005, max = 2019, ticks = T,
-      #      value = range(c(2005:2019), na.rm = T),
-       #    dragRange = F)
-        #   })
-
- 
   
   #Selected Fish biomass data
    selectedData_fish.biomass <- reactive ({ 
@@ -220,7 +214,9 @@
        if(input$fish_family == "All fish families") {
        
    plot_fish.biomass.mci <- ggplot(selectedData_fish.biomass(),
-                                       aes(location_status, biomass_kg_ha), na.rm = TRUE) +
+                                       aes(location_status, 
+                                           biomass_kg_ha), 
+                                   na.rm = TRUE) +
       theme_rare+
       facet_wrap(c(input$grouping_level), ncol=4, scale = input$y_axis)+
       geom_jitter(alpha=0.1, width = 0.05, height = 0, size =2) + 
@@ -1267,9 +1263,11 @@
     
   plot_map <- function () {
      ##Add leafleat function
-    leaflet(data=ses_aoi) %>%
+    leaflet(data = selectedData_map()) %>%
        ## Setup SetView
-      setView(lng=mean(selectedData_map()$lon), lat=mean(selectedData_map()$lat), zoom=8) %>%
+      setView(lng=mean(selectedData_map()$lon), 
+              lat=mean(selectedData_map()$lat), 
+              zoom=8) %>%
       ## Add Basemap
       addProviderTiles(input$basemap) %>%
         
@@ -1278,24 +1276,11 @@
          #color = "black", weight = 1, smoothFactor = 0.8, opacity = 0.5, 
             #fillColor = "white", fillOpacity = 0.5, 
                #label = paste("District",idn_adm0$NAME_1)) %>%
-        
-      ## Add Local governemnt unit (district)
-      #addPolygons(data=subset(idn_adm2, NAME_1 == "Sulawesi Tenggara"),
-       #  color = "black", weight = 0.5, smoothFactor = 1, opacity = 0.5, 
-        #    popup = paste("District", idn_adm2$NAME_2), fillColor = "white", fillOpacity = 0.01, 
-         #      label = paste("District",idn_adm2$NAME_2),
-          #        highlightOptions = highlightOptions(color = "darkorange", weight = 2, bringToFront = TRUE)) %>%
-        
-      ## Add Managed Access areas 
-        addPolygons(data=ses_aoi,
-               color = "red", weight = 1, smoothFactor = 0.8, opacity = 0.5, 
-                  fillColor = "red", fillOpacity = 0.01, 
-        label = paste("Managed Access",ses_aoi$Name),
-            highlightOptions = highlightOptions(color = "red", weight = 2, bringToFront = TRUE)) %>%
-
       ## Add survey locations as markers
-        addCircleMarkers(lng= selectedData_map()$lon, lat= selectedData_map()$lat, radius = ~runif(100, 1, 1),
-            color = "red", fillOpacity = 0.5, 
+        addCircleMarkers(lng= selectedData_map()$lon, 
+                         lat= selectedData_map()$lat, 
+                         radius = ~runif(100, 1, 1),
+            color = "darkred", fillOpacity = 0.5, 
                popup = paste0("<strong> MA name: </strong>",
                               selectedData_fish.biomass()$ma_name,
                               "<br><strong>Location: </strong>",  
@@ -1303,32 +1288,39 @@
                               "<br>",
                               "<br><strong> Fish biomass: </strong>", 
                                  round(tapply(selectedData_fish.biomass()$biomass_kg_ha, 
-                                              selectedData_fish.biomass()$location_name, mean),1)," kg/ha",
+                                              selectedData_fish.biomass()$location_name, 
+                                              mean),1)," kg/ha",
                               "<br><strong> Fish size: </strong>",
                                  round(tapply(selectedData_fish.size()$length,
-                                           selectedData_fish.size()$location_name, mean),1), " cm",
+                                           selectedData_fish.size()$location_name, 
+                                           mean),1), " cm",
                               "<br><strong> Coral cover: </strong>",
-                                 round(tapply(subset(selectedData_benthic.cover(),category=="Hard coral")$percentage,
-                                                    subset(selectedData_benthic.cover(),category=="Hard coral")$location_name, mean),1)," %",
+                                 round(tapply(subset(selectedData_benthic.cover(),
+                                                     category=="Hard coral")$percentage,
+                                                    subset(selectedData_benthic.cover(),
+                                                           category=="Hard coral")$location_name, 
+                                              mean),1)," %",
                                "<br><strong> Algae cover: </strong>",
-                                 round(tapply(subset(selectedData_benthic.cover(),category=="Macroalgae")$percentage,
-                                           subset(selectedData_benthic.cover(),category=="Macroalgae")$location_name, mean),1)," %"),
+                                 round(tapply(subset(selectedData_benthic.cover(),
+                                                     category=="Macroalgae")$percentage,
+                                           subset(selectedData_benthic.cover(),
+                                                  category=="Macroalgae")$location_name, mean),1)," %"),
               label =  paste("Location: ", selectedData_fish.biomass()$location_name),
               popupOptions = popupOptions(closeButton = FALSE)) %>% 
        
         ## Add legend to map
-        addLegend(title = "LEGEND", colors = c("white","","red"), 
-            labels = c("Districts","","Survey location"), opacity = 0.5,
+        addLegend(title = "LEGEND", colors = c("darkred"), 
+            labels = c("Survey location"), opacity = 0.5,
                group =  selectedData_fish.biomass()$location_name) %>% 
         ## Add scale ba
-        addScaleBar(position = "bottomleft", options = scaleBarOptions(imperial=FALSE)) %>%
+        addScaleBar(position = "bottomleft", 
+                    options = scaleBarOptions(imperial=FALSE)) %>%
         ## Add miniMap
-        addMiniMap(tiles = input$basemap, toggleDisplay = TRUE, position = "bottomright")
+        addMiniMap(tiles = input$basemap, 
+                   toggleDisplay = TRUE, position = "bottomright")
      
          ## Add graticule and add measure and add mouse coordinates
         #addGraticule(interval = 1) %>%  addMeasure() %>% leafem::addMouseCoordinates() %>% 
-        
-     
   }
   
   #Download Figure

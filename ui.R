@@ -24,10 +24,10 @@
                #select Country
                  selectInput(inputId = "Country", 
                              label = strong("Country"),
-                             choices = c("Honduras"= "HND",
-                                         "Indonesia" = "IDN",
-                                         "Philippines" = "PHL",
-                                         "Mozambique" = "MOZ"),
+                             choices = c("Honduras"= 'HND',
+                                         "Indonesia" = 'IDN',
+                                         "Philippines" = 'PHL',
+                                         "Mozambique" = 'MOZ'),
                              selected = "IDN", 
                              multiple =FALSE, 
                              selectize = TRUE),
@@ -176,8 +176,8 @@
                         downloadLink("downloadData0", "Download data | ", 
                                        style="float:right"),
                         plotOutput(outputId = "plot_fish_biomass", 
-                                   height = "800px", 
-                                   width = "850px",
+                                   height = "600px", 
+                                   width = "650px",
                                    hover = hoverOpts(id = "plot_hover")),
                         ),
                            #uiOutput("hover_info2"), # hover option in server
@@ -189,8 +189,8 @@
                               downloadLink("downloadData1", "Download data |", 
                                            style="float:right"),
                           plotOutput(outputId = "plot_fish.density", 
-                                     height = "800px", 
-                                     width = "850px",
+                                     height = "600px", 
+                                     width = "650px",
                                      hover = hoverOpts(id = "plot_hover"))
                           ),
                                  
@@ -201,8 +201,8 @@
                                  downloadLink("downloadData2", "Download data |", 
                                               style="float:right"),
                          plotOutput(outputId = "plot_fish.size", 
-                                    height = "800px", 
-                                    width = "850px",
+                                    height = "600px", 
+                                    width = "650px",
                                     hover = hoverOpts(id = "plot_hover"))
                           ),
                                  
@@ -213,8 +213,8 @@
                                  downloadLink("downloadData3", "Download data |", 
                                               style="float:right"),
                          plotOutput(outputId = "plot_fish.deversity", 
-                                    height = "800px", 
-                                    width = "850px",
+                                    height = "600px", 
+                                    width = "650px",
                                     hover = hoverOpts(id = "plot_hover"))
                           ),
                              
@@ -225,8 +225,8 @@
                                  downloadLink("downloadData4", "Download data |", 
                                               style="float:right"),
                          plotOutput(outputId = 'plot_hardcoral.cover', 
-                                    height ='800px', 
-                                    width = '850px',
+                                    height ='600px', 
+                                    width = '650px',
                                     hover = hoverOpts(id = "plot_hover"))
                           ), 
                                 
@@ -237,8 +237,8 @@
                                  downloadLink("downloadData5", "Download data |",
                                               style="float:right"),
                           plotOutput(outputId = 'plot_benthic.diversity',
-                                     height ='800px',
-                                     width = '850px',
+                                     height ='600px',
+                                     width = '650px',
                                      hover = hoverOpts(id = "plot_hover"))
                           ),
                             
@@ -248,8 +248,8 @@
                                downloadLink(outputId ="downloadMap", "Download Map",  
                                             style="float:right"),
                                leafletOutput(outputId = 'map', 
-                                             height='800px', 
-                                             width='850px')
+                                             height='600px', 
+                                             width='650px')
                                ),
 
                       # Create Report Tab

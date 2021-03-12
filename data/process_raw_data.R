@@ -11,7 +11,9 @@ library (readr)
   #Recode location status
   fish.surveys$location_status <- dplyr::recode_factor(fish.surveys$location_status, 
                                               "ma" = "Outside \nReserve",
-                                              "reserve"  = "Inside \nReserve")
+                                              "reserve"  = "Inside \nReserve",
+                                              "Outside" = "Outside \nReserve",
+                                              "outside" = "Outside \nReserve")
   ## Remove test sites
   fish.surveys <- fish.surveys %>%
                      filter(location_name != "Test" &
@@ -32,4 +34,23 @@ library (readr)
   
   
   readr::write_rds(tibble(fish.surveys), "data/fish.surveys.rds")
+  
+  #Load Benthic data
+  benthic.surveys <- data.table::fread("https://query.data.world/s/xk5fxswlaztskxvg6s47htdybjds3h", 
+                              header=TRUE, 
+                              stringsAsFactors=TRUE, 
+                              encoding = "UTF-8")
+  
+  benthic.surveys$location_status <-  benthic.surveys$locationstatus
+  benthic.surveys$location_name <- benthic.surveys$locationname
+  
+  benthic.surveys$location_status <- 
+    dplyr::recode_factor(benthic.surveys$location_status, 
+                         "ma" = "Outside \nReserve",
+                         "reserve"  = "Inside \nReserve",
+                         "Outside" = "Outside \nReserve",
+                         "outside" = "Outside \nReserve")
+  
+  readr::write_rds(tibble(benthic.surveys), "data/benthic.surveys.rds")
+
   
