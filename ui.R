@@ -1,9 +1,13 @@
  ## DEFINE UI ###
   fillPage(
     fluidPage(theme = shinytheme("lumen"),
+      ## initiate tour UI
+      introjsUI(),
+      
       fluidRow (
         column(width = 3,
                #Select the type of plot to use
+               introBox(
                selectInput(inputId = 'grouping_level', 
                            strong("ANALYSIS LEVEL"),
                            choices = c("Country" = 'country', 
@@ -11,6 +15,9 @@
                                        "Local Government"= "level2_name", 
                                        "Managed Access Area"='ma_name'),
                            selected = "ma_name"),
+               data.step = 1,
+               data.intro = "Here you can select the geographic grouping to analyze",
+               data.position = 'right'),
                ## help text
                bsTooltip(id="grouping_level", 
                          title ="Select a grouping level to calculate means and errors",
@@ -19,7 +26,14 @@
                          options = list(container = "body")
                          )
         ),
-        column(width = 2,
+        ## tutorial button
+        column(width = 2, align = 'center', offset = 7,
+               actionButton(style = 'font-size: 36px; background-color: #fff0; border-color: #fff0',
+                            inputId = 'help', label = '', icon=icon('question-circle'), width = '50px'))
+        ),
+        introBox(
+        fluidRow(
+        column(width = 3,
                #select country
                  selectInput(inputId = "Country", 
                              label = strong("Country"),
@@ -38,7 +52,7 @@
                            options = list(container = "body")
                            )
                ),
-        column(width = 2,
+        column(width = 3,
                #Select subnational government
                  uiOutput("Subnational_Government"),  
                  bsTooltip(id="Subnational_Government", 
@@ -48,7 +62,7 @@
                            options = list(container = "body")
                            )
                ),
-        column(width = 2,
+        column(width = 3,
                  #Select local government
                  uiOutput(outputId = "Local_Government"),   
                  bsTooltip(id="Local_Government", 
@@ -58,7 +72,7 @@
                            options = list(container = "body")
                            )
                 ),
-        column(width = 2,
+        column(width = 3,
                   #Select managed access 
                  uiOutput(outputId = "Managed_Access"),  
                  bsTooltip(id="Managed_Access", 
@@ -67,11 +81,14 @@
                            trigger = "hover", 
                            options = list(container = "body")
                            )
-            )
-        ),
+        )),
+        data.step = 2,
+        data.intro = "After selecting the grouping, pick the specific areas to view data from.
+        By default, all options within a country are selected."),
          
       fluidRow(
         column(width = 3,
+               introBox(
                wellPanel(
                  
                  conditionalPanel(condition = "input.tabs == 'Coral Reefs' |
@@ -244,15 +261,22 @@
              #Note about page reloading
               strong(textOutput(outputId = "Note")),
                  textOutput(outputId ="Notetext")
-               )
+               ),
+               data.step = 7,
+               data.intro = "Here you can customize how you wish to display information.
+               The options change depending on which output tab you have selected.",
+               data.position = 'right')
         ),
                   
         column(width=9,
-                   mainPanel(width =14,
+                   mainPanel(width =14, introBox(
                       tabsetPanel(type = "tabs", id = "tabs",
                       
                       ## Fish biomass
-                  tabPanel ("Coral Reefs", icon = icon("fish"),
+                  tabPanel (introBox(icon('fish'), "Coral Reefs",
+                                     data.step = 4,
+                                     data.intro = "This tab will display ecological data plots."),
+                            value = "Coral Reefs",
                     
                       conditionalPanel(condition = "input.reef_seagrass_metric == 'Fish Biomass'", 
                         downloadLink(outputId ="downloadPlot0", "| Download figure",  
@@ -334,8 +358,10 @@
                       tabPanel ("Mangrove Forests", icon = icon("seedling")),
                       
                       #Create Map Tab       
-                      tabPanel("View Map", 
-                               icon = icon("map"),
+                      tabPanel(introBox(icon('fish'), "View Map",
+                                        data.step = 5,
+                                        data.intro = "This tab will display a map with survey sites labelled."),
+                               value = "View Map",
                                br(),
                                downloadLink(outputId ="downloadMap", "Download Map",  
                                             style="float:right"),
@@ -345,9 +371,10 @@
                                ),
 
                       # Create Report Tab
-                        tabPanel(strong("Reporting",
-                                        style='color:#005BBB'), 
-                                 icon = icon("file-alt", class = "solid"),
+                        tabPanel(introBox(icon("file-alt", class = "solid"),
+                                          strong("Reporting", style='color:#005BBB'),
+                                          data.step = 6,
+                                          data.intro = "This tab will allow you to download a summary report."),
                                  verbatimTextOutput("create_report"),
                               br(),
                               strong(h4(textOutput(outputId = "report_instructions"))), 
@@ -377,7 +404,10 @@
                                              label='Generate Report', 
                                              class = 'butt'),
                               tags$head(tags$style(".butt{background-color:#F58233;} .butt{color: black;!important;}")))
-                                )
+                                ),
+                      data.step = 3,
+                      data.intro = "Various outputs are displayed here.",
+                      data.position = 'left')
                             )
                         )
                       )

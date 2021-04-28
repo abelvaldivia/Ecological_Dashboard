@@ -25,6 +25,7 @@ library(scales)
 library(leaflet)
 library(leafem)
 library(rgdal)
+library(rintrojs)
 
 # Suppress summarise info
 options(dplyr.summarise.inform = FALSE)
