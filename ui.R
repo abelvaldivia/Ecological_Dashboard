@@ -262,7 +262,7 @@
               strong(textOutput(outputId = "Note")),
                  textOutput(outputId ="Notetext")
                ),
-               data.step = 7,
+               data.step = 3,
                data.intro = "Here you can customize how you wish to display information.
                The options change depending on which output tab you have selected.",
                data.position = 'right')
@@ -274,7 +274,7 @@
                       
                       ## Fish biomass
                   tabPanel (introBox(icon('fish'), "Coral Reefs",
-                                     data.step = 4,
+                                     data.step = 5,
                                      data.intro = "This tab will display ecological data plots."),
                             value = "Coral Reefs",
                     
@@ -358,8 +358,8 @@
                       tabPanel ("Mangrove Forests", icon = icon("seedling")),
                       
                       #Create Map Tab       
-                      tabPanel(introBox(icon('fish'), "View Map",
-                                        data.step = 5,
+                      tabPanel(introBox(icon('map'), "View Map",
+                                        data.step = 6,
                                         data.intro = "This tab will display a map with survey sites labelled."),
                                value = "View Map",
                                br(),
@@ -373,7 +373,7 @@
                       # Create Report Tab
                         tabPanel(introBox(icon("file-alt", class = "solid"),
                                           strong("Reporting", style='color:#005BBB'),
-                                          data.step = 6,
+                                          data.step = 7,
                                           data.intro = "This tab will allow you to download a summary report."),
                                  verbatimTextOutput("create_report"),
                               br(),
@@ -405,7 +405,7 @@
                                              class = 'butt'),
                               tags$head(tags$style(".butt{background-color:#F58233;} .butt{color: black;!important;}")))
                                 ),
-                      data.step = 3,
+                      data.step = 4,
                       data.intro = "Various outputs are displayed here.",
                       data.position = 'left')
                             )
