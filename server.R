@@ -3,6 +3,8 @@
   
   shinyServer(function(input, output, session) {
   
+  ## Tutorial
+  observeEvent(input$help, introjs(session))
   
   ## Region/Province
   
